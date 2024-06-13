@@ -17,7 +17,7 @@ export default function App() {
                     tabBarActiveTintColor: '#e91e63',
                 }}>
                 <Tab.Screen
-                    name="Map"
+                    name="Gym Pins Rotterdam"
                     component={Map}
                     options={{
                         tabBarLabel: 'Map',
