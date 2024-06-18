@@ -1,31 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Modal, TextInput, Button, Text } from 'react-native';
+import { View, StyleSheet, Modal, TextInput, Button, Text, TouchableOpacity, ScrollView } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// Initial locations data
+import Drawer from './Drawer'; // Import the Drawer component
 import initialLocations from './locations.json';
 
-// AsyncStorage keys
 const LOCATIONS_STORAGE_KEY = 'locations';
 
 function Map() {
     const [locations, setLocations] = useState([]);
+    const [selectedLocation, setSelectedLocation] = useState(null);
+    const [rating, setRating] = useState('');
+    const [description, setDescription] = useState('');
+    const [favorite, setFavorite] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [drawerVisible, setDrawerVisible] = useState(false);
+    const [mapRegion, setMapRegion] = useState({
+        latitude: 51.92561635593618,
+        longitude: 4.509532641744117,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+    });
 
     useEffect(() => {
-        // Load locations data from AsyncStorage on component mount
         loadLocations();
     }, []);
 
-    // Load locations from AsyncStorage
     const loadLocations = async () => {
         try {
             const storedLocations = await AsyncStorage.getItem(LOCATIONS_STORAGE_KEY);
             if (storedLocations !== null) {
-                // Parse stored data
                 setLocations(JSON.parse(storedLocations));
             } else {
-                // If no data in AsyncStorage, use initialLocations from JSON
                 setLocations(initialLocations);
             }
         } catch (error) {
@@ -33,7 +39,6 @@ function Map() {
         }
     };
 
-    // Save locations to AsyncStorage
     const saveLocations = async (updatedLocations) => {
         try {
             await AsyncStorage.setItem(LOCATIONS_STORAGE_KEY, JSON.stringify(updatedLocations));
@@ -42,11 +47,16 @@ function Map() {
         }
     };
 
-    const [selectedLocation, setSelectedLocation] = useState(null);
-    const [rating, setRating] = useState('');
-    const [description, setDescription] = useState('');
-    const [favorite, setFavorite] = useState(false);
-    const [modalVisible, setModalVisible] = useState(false);
+    const selectLocationFromDrawer = (location) => {
+        setSelectedLocation(location);
+        setDrawerVisible(false);
+        setMapRegion({
+            latitude: location.latitude,
+            longitude: location.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+        });
+    };
 
     const openModal = (location) => {
         setSelectedLocation(location);
@@ -57,7 +67,6 @@ function Map() {
     };
 
     const saveChanges = () => {
-        // Update the location data in state
         const updatedLocations = locations.map(loc => {
             if (loc.id === selectedLocation.id) {
                 return {
@@ -71,7 +80,7 @@ function Map() {
         });
 
         setLocations(updatedLocations);
-        saveLocations(updatedLocations); // Save updated locations to AsyncStorage
+        saveLocations(updatedLocations);
         setModalVisible(false);
     };
 
@@ -79,16 +88,15 @@ function Map() {
         setFavorite(!favorite);
     };
 
+    const openDrawer = () => {
+        setDrawerVisible(true);
+    };
+
     return (
         <View style={styles.container}>
             <MapView
                 style={styles.map}
-                initialRegion={{
-                    latitude: 51.92561635593618,
-                    longitude: 4.509532641744117,
-                    latitudeDelta: 0.0922,
-                    longitudeDelta: 0.0421,
-                }}
+                region={mapRegion}
             >
                 {locations.map((location) => (
                     <Marker
@@ -100,6 +108,12 @@ function Map() {
                     />
                 ))}
             </MapView>
+
+            <TouchableOpacity style={styles.drawerButton} onPress={openDrawer}>
+                <Text style={styles.drawerButtonText}>Locations</Text>
+            </TouchableOpacity>
+
+            <Drawer visible={drawerVisible} locations={locations} selectLocation={selectLocationFromDrawer} />
 
             <Modal
                 visible={modalVisible}
@@ -174,6 +188,19 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginBottom: 15,
         width: '100%',
+    },
+    drawerButton: {
+        position: 'absolute',
+        top: 20,
+        left: 20,
+        backgroundColor: '#fff',
+        padding: 10,
+        borderRadius: 5,
+        zIndex: 1,
+        elevation: 2,
+    },
+    drawerButtonText: {
+        fontSize: 16,
     },
 });
 
