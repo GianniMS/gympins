@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Modal, TextInput, Button, Text, TouchableOpacity } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import { View, StyleSheet, Modal, TextInput, Text, TouchableOpacity } from 'react-native';
+import MapView, { Marker, Callout } from 'react-native-maps';
 import Drawer from './Drawer';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 function Map({ locations, setLocations, saveLocations }) {
     const [selectedLocation, setSelectedLocation] = useState(null);
@@ -30,7 +31,7 @@ function Map({ locations, setLocations, saveLocations }) {
 
     const openModal = (location) => {
         setSelectedLocation(location);
-        setRating(location.rating.toString());
+        setRating(location.rating.toString()); // Assuming location.rating is a number out of 10
         setDescription(location.description);
         setFavorite(location.favorite);
         setModalVisible(true);
@@ -41,7 +42,7 @@ function Map({ locations, setLocations, saveLocations }) {
             if (loc.id === selectedLocation.id) {
                 return {
                     ...loc,
-                    rating: parseFloat(rating),
+                    rating: parseFloat(rating), // Convert input to number
                     description: description,
                     favorite: favorite,
                 };
@@ -58,8 +59,8 @@ function Map({ locations, setLocations, saveLocations }) {
         setFavorite(!favorite);
     };
 
-    const openDrawer = () => {
-        setDrawerVisible(true);
+    const toggleDrawer = () => {
+        setDrawerVisible(!drawerVisible);
     };
 
     return (
@@ -73,14 +74,23 @@ function Map({ locations, setLocations, saveLocations }) {
                         key={location.id}
                         coordinate={{ latitude: location.latitude, longitude: location.longitude }}
                         title={location.name}
-                        description={`Rating: ${location.rating}\nDescription: ${location.description}\nFavorite: ${location.favorite ? 'Yes' : 'No'}`}
-                        onCalloutPress={() => openModal(location)}
-                    />
+                        pinColor={location.favorite ? 'yellow' : 'red'} // Change pinColor based on favorite status
+                    >
+                        <Callout onPress={() => openModal(location)}>
+                            <View style={styles.callout}>
+                                <Text style={styles.calloutTitle}>{location.name}</Text>
+                            </View>
+                        </Callout>
+                    </Marker>
                 ))}
             </MapView>
 
-            <TouchableOpacity style={styles.drawerButton} onPress={openDrawer}>
-                <Text style={styles.drawerButtonText}>Locations</Text>
+            <TouchableOpacity style={styles.drawerButton} onPress={toggleDrawer}>
+                <MaterialCommunityIcons
+                    name={drawerVisible ? 'close-circle' : 'view-headline'}
+                    size={30}
+                    color="#000"
+                />
             </TouchableOpacity>
 
             <Drawer visible={drawerVisible} locations={locations} selectLocation={selectLocationFromDrawer} />
@@ -93,28 +103,48 @@ function Map({ locations, setLocations, saveLocations }) {
             >
                 <View style={styles.fullScreenModal}>
                     <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
-                        <Text style={styles.closeButtonText}>Close</Text>
+                        <MaterialCommunityIcons name="close-circle" size={30} color="#000"/>
                     </TouchableOpacity>
                     <View style={styles.modalView}>
-                        <Text style={styles.modalText}>Edit Location</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={rating}
-                            onChangeText={setRating}
-                            placeholder="Rating"
-                            keyboardType="numeric"
-                        />
-                        <TextInput
-                            style={styles.input}
-                            value={description}
-                            onChangeText={setDescription}
-                            placeholder="Description"
-                        />
+                        <Text style={[styles.modalText, styles.boldText]}>Location Details</Text>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Rating:</Text>
+                            <View style={styles.ratingInputContainer}>
+                                <TextInput
+                                    style={styles.ratingInput}
+                                    value={rating}
+                                    onChangeText={setRating}
+                                    placeholder="0-10"
+                                    keyboardType="numeric"
+                                />
+                                <Text>/10</Text>
+                            </View>
+                        </View>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Description:</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={description}
+                                onChangeText={setDescription}
+                                placeholder="Description"
+                            />
+                        </View>
                         <View style={styles.favoriteContainer}>
                             <Text>Favorite: {favorite ? 'Yes' : 'No'}</Text>
-                            <Button title="Toggle Favorite" onPress={toggleFavorite} />
+                            <TouchableOpacity onPress={toggleFavorite}>
+                                <MaterialCommunityIcons
+                                    name={favorite ? 'star' : 'star-outline'}
+                                    size={30}
+                                    color={favorite ? 'gold' : 'gray'}
+                                />
+                            </TouchableOpacity>
                         </View>
-                        <Button title="Save" onPress={saveChanges} />
+                        <TouchableOpacity
+                            style={styles.saveButton} // Custom style for the Save button
+                            onPress={saveChanges}
+                        >
+                            <Text style={styles.saveButtonText}>Save</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </Modal>
@@ -129,6 +159,23 @@ const styles = StyleSheet.create({
     map: {
         ...StyleSheet.absoluteFillObject,
     },
+    callout: {
+        flex: 1,
+        position: 'relative',
+        backgroundColor: '#fff',
+        padding: 10,
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.8,
+        shadowRadius: 2,
+        elevation: 5,
+    },
+    calloutTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 5,
+    },
     fullScreenModal: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.5)',
@@ -138,9 +185,6 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 40,
         right: 20,
-        backgroundColor: '#fff',
-        padding: 10,
-        borderRadius: 5,
         zIndex: 1,
     },
     closeButtonText: {
@@ -166,6 +210,31 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 20,
     },
+    boldText: {
+        fontWeight: 'bold',
+    },
+    inputContainer: {
+        marginBottom: 15,
+        width: '100%',
+        alignItems: 'center',
+    },
+    label: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 5,
+    },
+    ratingInputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    ratingInput: {
+        height: 40,
+        borderColor: 'gray',
+        borderWidth: 1,
+        width: 60,
+        paddingLeft: 10,
+        marginRight: 5,
+    },
     input: {
         height: 40,
         borderColor: 'gray',
@@ -185,14 +254,19 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 20,
         left: 20,
-        backgroundColor: '#fff',
-        padding: 10,
-        borderRadius: 5,
         zIndex: 1,
-        elevation: 2,
     },
-    drawerButtonText: {
+    saveButton: {
+        backgroundColor: 'black',
+        borderRadius: 5,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        marginTop: 15, // Adjust the spacing between favoriteContainer and Save button
+    },
+    saveButtonText: {
+        color: 'white',
         fontSize: 16,
+        textAlign: 'center',
     },
 });
 
