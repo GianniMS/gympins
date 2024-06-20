@@ -1,14 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Modal, TextInput, Button, Text, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, Modal, TextInput, Button, Text, TouchableOpacity } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Drawer from './Drawer'; // Import the Drawer component
-import initialLocations from './locations.json';
 
-const LOCATIONS_STORAGE_KEY = 'locations';
-
-function Map() {
-    const [locations, setLocations] = useState([]);
+function Map({ locations, setLocations, saveLocations }) {
     const [selectedLocation, setSelectedLocation] = useState(null);
     const [rating, setRating] = useState('');
     const [description, setDescription] = useState('');
@@ -21,31 +16,6 @@ function Map() {
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421,
     });
-
-    useEffect(() => {
-        loadLocations();
-    }, []);
-
-    const loadLocations = async () => {
-        try {
-            const storedLocations = await AsyncStorage.getItem(LOCATIONS_STORAGE_KEY);
-            if (storedLocations !== null) {
-                setLocations(JSON.parse(storedLocations));
-            } else {
-                setLocations(initialLocations);
-            }
-        } catch (error) {
-            console.error('Error loading locations from AsyncStorage:', error);
-        }
-    };
-
-    const saveLocations = async (updatedLocations) => {
-        try {
-            await AsyncStorage.setItem(LOCATIONS_STORAGE_KEY, JSON.stringify(updatedLocations));
-        } catch (error) {
-            console.error('Error saving locations to AsyncStorage:', error);
-        }
-    };
 
     const selectLocationFromDrawer = (location) => {
         setSelectedLocation(location);
