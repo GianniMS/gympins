@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Modal, TextInput, Text, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Modal, TextInput, Button, Text, TouchableOpacity } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import Drawer from './Drawer';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -106,7 +106,7 @@ function Map({ locations, setLocations, saveLocations }) {
                         <MaterialCommunityIcons name="close-circle" size={30} color="#000"/>
                     </TouchableOpacity>
                     <View style={styles.modalView}>
-                        <Text style={[styles.modalText, styles.boldText]}>Location Details</Text>
+                        <Text style={styles.modalText}>Location Details</Text>
                         <View style={styles.inputContainer}>
                             <Text style={styles.label}>Rating:</Text>
                             <View style={styles.ratingInputContainer}>
@@ -139,12 +139,7 @@ function Map({ locations, setLocations, saveLocations }) {
                                 />
                             </TouchableOpacity>
                         </View>
-                        <TouchableOpacity
-                            style={styles.saveButton} // Custom style for the Save button
-                            onPress={saveChanges}
-                        >
-                            <Text style={styles.saveButtonText}>Save</Text>
-                        </TouchableOpacity>
+                        <Button title="Save" onPress={saveChanges}/>
                     </View>
                 </View>
             </Modal>
@@ -210,9 +205,6 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 20,
     },
-    boldText: {
-        fontWeight: 'bold',
-    },
     inputContainer: {
         marginBottom: 15,
         width: '100%',
@@ -256,17 +248,8 @@ const styles = StyleSheet.create({
         left: 20,
         zIndex: 1,
     },
-    saveButton: {
-        backgroundColor: 'black',
-        borderRadius: 5,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        marginTop: 15, // Adjust the spacing between favoriteContainer and Save button
-    },
-    saveButtonText: {
-        color: 'white',
+    drawerButtonText: {
         fontSize: 16,
-        textAlign: 'center',
     },
 });
 
