@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Modal, TextInput, Button, Text, TouchableOpacity } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import Drawer from './Drawer'; // Import the Drawer component
+import Drawer from './Drawer';
 
 function Map({ locations, setLocations, saveLocations }) {
     const [selectedLocation, setSelectedLocation] = useState(null);
@@ -91,26 +91,31 @@ function Map({ locations, setLocations, saveLocations }) {
                 transparent={true}
                 onRequestClose={() => setModalVisible(false)}
             >
-                <View style={styles.modalView}>
-                    <Text style={styles.modalText}>Edit Location</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={rating}
-                        onChangeText={setRating}
-                        placeholder="Rating"
-                        keyboardType="numeric"
-                    />
-                    <TextInput
-                        style={styles.input}
-                        value={description}
-                        onChangeText={setDescription}
-                        placeholder="Description"
-                    />
-                    <View style={styles.favoriteContainer}>
-                        <Text>Favorite: {favorite ? 'Yes' : 'No'}</Text>
-                        <Button title="Toggle Favorite" onPress={toggleFavorite} />
+                <View style={styles.fullScreenModal}>
+                    <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+                        <Text style={styles.closeButtonText}>Close</Text>
+                    </TouchableOpacity>
+                    <View style={styles.modalView}>
+                        <Text style={styles.modalText}>Edit Location</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={rating}
+                            onChangeText={setRating}
+                            placeholder="Rating"
+                            keyboardType="numeric"
+                        />
+                        <TextInput
+                            style={styles.input}
+                            value={description}
+                            onChangeText={setDescription}
+                            placeholder="Description"
+                        />
+                        <View style={styles.favoriteContainer}>
+                            <Text>Favorite: {favorite ? 'Yes' : 'No'}</Text>
+                            <Button title="Toggle Favorite" onPress={toggleFavorite} />
+                        </View>
+                        <Button title="Save" onPress={saveChanges} />
                     </View>
-                    <Button title="Save" onPress={saveChanges} />
                 </View>
             </Modal>
         </View>
@@ -123,6 +128,23 @@ const styles = StyleSheet.create({
     },
     map: {
         ...StyleSheet.absoluteFillObject,
+    },
+    fullScreenModal: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+    },
+    closeButton: {
+        position: 'absolute',
+        top: 40,
+        right: 20,
+        backgroundColor: '#fff',
+        padding: 10,
+        borderRadius: 5,
+        zIndex: 1,
+    },
+    closeButtonText: {
+        fontSize: 16,
     },
     modalView: {
         margin: 20,
