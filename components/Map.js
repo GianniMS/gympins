@@ -3,8 +3,9 @@ import { View, StyleSheet, Modal, TextInput, Button, Text, TouchableOpacity } fr
 import MapView, { Marker, Callout } from 'react-native-maps';
 import Drawer from './Drawer';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import darkMapStyle from './darkMapStyle.json'; // Import the dark map style
 
-function Map({ locations, setLocations, saveLocations }) {
+function Map({ locations, setLocations, saveLocations, isDarkMode }) {
     const [selectedLocation, setSelectedLocation] = useState(null);
     const [rating, setRating] = useState('');
     const [description, setDescription] = useState('');
@@ -68,6 +69,7 @@ function Map({ locations, setLocations, saveLocations }) {
             <MapView
                 style={styles.map}
                 region={mapRegion}
+                customMapStyle={isDarkMode ? darkMapStyle : []} // Apply dark map style conditionally
             >
                 {locations.map((location) => (
                     <Marker
@@ -89,11 +91,11 @@ function Map({ locations, setLocations, saveLocations }) {
                 <MaterialCommunityIcons
                     name={drawerVisible ? 'close-circle' : 'view-headline'}
                     size={30}
-                    color="#000"
+                    color={isDarkMode ? '#fff' : '#000'} // Conditionally set color based on dark mode
                 />
             </TouchableOpacity>
 
-            <Drawer visible={drawerVisible} locations={locations} selectLocation={selectLocationFromDrawer} />
+            <Drawer visible={drawerVisible} locations={locations} selectLocation={selectLocationFromDrawer} isDarkMode={isDarkMode} />
 
             <Modal
                 visible={modalVisible}
@@ -103,7 +105,7 @@ function Map({ locations, setLocations, saveLocations }) {
             >
                 <View style={styles.fullScreenModal}>
                     <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
-                        <MaterialCommunityIcons name="close-circle" size={30} color="#000"/>
+                        <MaterialCommunityIcons name="close-circle" size={30} color={isDarkMode ? '#fff' : '#000'} /> {/* Conditionally set color based on dark mode */}
                     </TouchableOpacity>
                     <View style={styles.modalView}>
                         <Text style={styles.modalText}>Location Details</Text>
@@ -139,7 +141,7 @@ function Map({ locations, setLocations, saveLocations }) {
                                 />
                             </TouchableOpacity>
                         </View>
-                        <Button title="Save" onPress={saveChanges}/>
+                        <Button title="Save" onPress={saveChanges} />
                     </View>
                 </View>
             </Modal>

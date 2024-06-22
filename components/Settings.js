@@ -1,17 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-function Settings() {
-    const [isDarkMode, setIsDarkMode] = useState(false);
-
-    const toggleDarkMode = () => {
-        setIsDarkMode(!isDarkMode);
-    };
-
+function Settings({ isDarkMode, toggleDarkMode }) {
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Mode</Text>
+        <View style={[styles.container, { backgroundColor: isDarkMode ? '#4e4d4c' : '#fff' }]}>
+            <Text style={[styles.title, { color: isDarkMode ? '#fff' : '#000' }]}>Mode</Text>
             <TouchableOpacity onPress={toggleDarkMode} style={styles.toggleButton}>
                 <MaterialCommunityIcons
                     name={isDarkMode ? 'moon-waning-crescent' : 'white-balance-sunny'}
@@ -26,7 +20,6 @@ function Settings() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -36,7 +29,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     toggleButton: {
-        backgroundColor: '#808080',
+        backgroundColor: 'red',
         padding: 10,
         borderRadius: 20,
     },
