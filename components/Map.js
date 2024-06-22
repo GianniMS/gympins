@@ -103,36 +103,38 @@ function Map({ locations, setLocations, saveLocations, isDarkMode }) {
                 transparent={true}
                 onRequestClose={() => setModalVisible(false)}
             >
-                <View style={styles.fullScreenModal}>
+                <View style={[styles.fullScreenModal, isDarkMode ? { backgroundColor: '#4e4d4c' } : { backgroundColor: '#fff' }]}>
                     <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
-                        <MaterialCommunityIcons name="close-circle" size={30} color={isDarkMode ? '#fff' : '#000'} /> {/* Conditionally set color based on dark mode */}
+                        <MaterialCommunityIcons name="close-circle" size={30} color={isDarkMode ? '#fff' : '#000'} />
                     </TouchableOpacity>
-                    <View style={styles.modalView}>
-                        <Text style={styles.modalText}>Location Details</Text>
+                    <View style={[styles.modalView, isDarkMode ? { backgroundColor: '#656463' } : { backgroundColor: 'white' }]}>
+                        <Text style={[styles.modalText, { color: isDarkMode ? '#fff' : '#000' }]}>Location Details</Text>
                         <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Rating:</Text>
+                            <Text style={[styles.label, { color: isDarkMode ? '#fff' : '#000' }]}>Rating:</Text>
                             <View style={styles.ratingInputContainer}>
                                 <TextInput
-                                    style={styles.ratingInput}
+                                    style={[styles.ratingInput, { color: isDarkMode ? '#fff' : '#000', borderColor: isDarkMode ? '#fff' : '#000' }]}
                                     value={rating}
                                     onChangeText={setRating}
                                     placeholder="0-10"
                                     keyboardType="numeric"
+                                    placeholderTextColor={isDarkMode ? '#ccc' : '#666'}
                                 />
-                                <Text>/10</Text>
+                                <Text style={{ color: isDarkMode ? '#fff' : '#000' }}>/10</Text>
                             </View>
                         </View>
                         <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Description:</Text>
+                            <Text style={[styles.label, { color: isDarkMode ? '#fff' : '#000' }]}>Description:</Text>
                             <TextInput
-                                style={styles.input}
+                                style={[styles.input, { color: isDarkMode ? '#fff' : '#000', borderColor: isDarkMode ? '#fff' : '#000' }]}
                                 value={description}
                                 onChangeText={setDescription}
                                 placeholder="Description"
+                                placeholderTextColor={isDarkMode ? '#ccc' : '#666'}
                             />
                         </View>
                         <View style={styles.favoriteContainer}>
-                            <Text>Favorite: {favorite ? 'Yes' : 'No'}</Text>
+                            <Text style={{ color: isDarkMode ? '#fff' : '#000' }}>Favorite: {favorite ? 'Yes' : 'No'}</Text>
                             <TouchableOpacity onPress={toggleFavorite}>
                                 <MaterialCommunityIcons
                                     name={favorite ? 'star' : 'star-outline'}
@@ -141,10 +143,15 @@ function Map({ locations, setLocations, saveLocations, isDarkMode }) {
                                 />
                             </TouchableOpacity>
                         </View>
-                        <Button title="Save" onPress={saveChanges} />
+                        <Button
+                            title="Save"
+                            onPress={saveChanges}
+                            color={isDarkMode ? 'red' : '#51AFF7'} // Red color in dark mode, blue color in light mode
+                        />
                     </View>
                 </View>
             </Modal>
+
         </View>
     );
 }
@@ -175,8 +182,8 @@ const styles = StyleSheet.create({
     },
     fullScreenModal: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
+        alignItems: 'center',
     },
     closeButton: {
         position: 'absolute',
@@ -184,14 +191,11 @@ const styles = StyleSheet.create({
         right: 20,
         zIndex: 1,
     },
-    closeButtonText: {
-        fontSize: 16,
-    },
     modalView: {
         margin: 20,
-        backgroundColor: 'white',
         borderRadius: 20,
         padding: 35,
+        width: '90%',
         alignItems: 'center',
         shadowColor: '#000',
         shadowOffset: {
@@ -206,6 +210,7 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         textAlign: 'center',
         fontSize: 20,
+        fontWeight: 'bold',
     },
     inputContainer: {
         marginBottom: 15,
