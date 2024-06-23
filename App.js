@@ -19,12 +19,14 @@ export default function App() {
     const [isDarkMode, setIsDarkMode] = useState(false);
 
     useEffect(() => {
+        // Load locations and dark mode status on component mount
         loadLocations();
         loadDarkModeStatus();
     }, []);
 
     const loadLocations = async () => {
         try {
+            // Load stored locations from AsyncStorage or use initialLocations
             const storedLocations = await AsyncStorage.getItem(LOCATIONS_STORAGE_KEY);
             if (storedLocations !== null) {
                 setLocations(JSON.parse(storedLocations));
@@ -38,6 +40,7 @@ export default function App() {
 
     const saveLocations = async (updatedLocations) => {
         try {
+            // Save updated locations to AsyncStorage
             await AsyncStorage.setItem(LOCATIONS_STORAGE_KEY, JSON.stringify(updatedLocations));
         } catch (error) {
             console.error('Error saving locations to AsyncStorage:', error);
@@ -46,6 +49,7 @@ export default function App() {
 
     const loadDarkModeStatus = async () => {
         try {
+            // Load dark mode status from AsyncStorage
             const darkModeStatus = await AsyncStorage.getItem(DARK_MODE_KEY);
             if (darkModeStatus !== null) {
                 setIsDarkMode(JSON.parse(darkModeStatus));
@@ -57,6 +61,7 @@ export default function App() {
 
     const saveDarkModeStatus = async (status) => {
         try {
+            // Save dark mode status to AsyncStorage
             await AsyncStorage.setItem(DARK_MODE_KEY, JSON.stringify(status));
         } catch (error) {
             console.error('Error saving dark mode status to AsyncStorage:', error);
@@ -64,11 +69,13 @@ export default function App() {
     };
 
     const toggleDarkMode = () => {
+        // Toggle dark mode status and save
         const newStatus = !isDarkMode;
         setIsDarkMode(newStatus);
         saveDarkModeStatus(newStatus);
     };
 
+    // Styles based on dark mode status
     const containerStyle = isDarkMode ? styles.darkContainer : styles.lightContainer;
     const statusBarStyle = isDarkMode ? 'light-content' : 'dark-content';
     const headerStyle = isDarkMode ? styles.darkHeader : styles.lightHeader;
@@ -76,6 +83,7 @@ export default function App() {
 
     return (
         <View style={[styles.container, containerStyle]}>
+            {/* Status bar with dynamic style */}
             <StatusBar style={statusBarStyle} />
             <NavigationContainer>
                 <Tab.Navigator
@@ -85,6 +93,7 @@ export default function App() {
                         headerStyle: headerStyle,
                         headerTintColor: headerTintColor,
                     }}>
+                    {/* Map screen */}
                     <Tab.Screen
                         name="Gym Pins Rotterdam"
                         options={{
@@ -95,6 +104,7 @@ export default function App() {
                         }}>
                         {() => <Map locations={locations} setLocations={setLocations} saveLocations={saveLocations} isDarkMode={isDarkMode} />}
                     </Tab.Screen>
+                    {/* Account screen */}
                     <Tab.Screen
                         name="Account"
                         options={{
@@ -105,6 +115,7 @@ export default function App() {
                         }}>
                         {() => <Account locations={locations} isDarkMode={isDarkMode} />}
                     </Tab.Screen>
+                    {/* Settings screen */}
                     <Tab.Screen
                         name="Settings"
                         options={{

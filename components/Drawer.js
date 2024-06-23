@@ -2,8 +2,10 @@ import React from 'react';
 import { View, ScrollView, TouchableOpacity, Text, StyleSheet } from 'react-native';
 
 const Drawer = ({ visible, locations, selectLocation, isDarkMode }) => {
+    // Return null if the drawer is not visible
     if (!visible) return null;
 
+    // Define styles dynamically based on isDarkMode prop
     const styles = StyleSheet.create({
         drawer: {
             position: 'absolute',
@@ -15,7 +17,7 @@ const Drawer = ({ visible, locations, selectLocation, isDarkMode }) => {
             paddingTop: 50,
             borderRightWidth: 1,
             borderColor: isDarkMode ? '#333' : '#ccc', // Conditional border color
-            elevation: 16,
+            elevation: 16, // Elevation for Android shadows
         },
         drawerContent: {
             flex: 1,
@@ -31,6 +33,7 @@ const Drawer = ({ visible, locations, selectLocation, isDarkMode }) => {
     return (
         <View style={styles.drawer}>
             <ScrollView style={styles.drawerContent}>
+                {/* Render each location as a TouchableOpacity */}
                 {locations.map((location) => (
                     <TouchableOpacity key={location.id} onPress={() => selectLocation(location)}>
                         <Text style={styles.drawerItemText}>{location.name}</Text>

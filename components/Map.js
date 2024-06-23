@@ -20,12 +20,15 @@ function Map({ locations, setLocations, saveLocations, isDarkMode }) {
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421,
     });
+    const [mapKey, setMapKey] = useState(0); // Key for triggering re-render of MapView
 
     useEffect(() => {
+        // Request location permission on component mount
         requestLocationPermission();
     }, []);
 
     const requestLocationPermission = async () => {
+        // Request foreground location permissions from user
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
             alert('Permission to access location was denied');
@@ -36,6 +39,7 @@ function Map({ locations, setLocations, saveLocations, isDarkMode }) {
 
     const getCurrentLocation = async () => {
         try {
+            // Get current device location and update map region
             const location = await Location.getCurrentPositionAsync({});
             const { latitude, longitude } = location.coords;
             setCurrentLocation({ latitude, longitude });
@@ -50,6 +54,7 @@ function Map({ locations, setLocations, saveLocations, isDarkMode }) {
     };
 
     const selectLocationFromDrawer = (location) => {
+        // Select location from drawer and update map region
         setSelectedLocation(location);
         setDrawerVisible(false);
         setMapRegion({
@@ -61,14 +66,16 @@ function Map({ locations, setLocations, saveLocations, isDarkMode }) {
     };
 
     const openModal = (location) => {
+        // Open modal to edit location details
         setSelectedLocation(location);
-        setRating(location.rating.toString()); // Assuming location.rating is a number out of 10
+        setRating(location.rating.toString()); // Convert rating to string for input field
         setDescription(location.description);
         setFavorite(location.favorite);
         setModalVisible(true);
     };
 
     const saveChanges = () => {
+        // Save changes made to location details
         const updatedLocations = locations.map(loc => {
             if (loc.id === selectedLocation.id) {
                 return {
@@ -81,33 +88,61 @@ function Map({ locations, setLocations, saveLocations, isDarkMode }) {
             return loc;
         });
 
-        setLocations(updatedLocations);
-        saveLocations(updatedLocations);
-        setModalVisible(false);
+        setLocations(updatedLocations); // Update locations state
+        saveLocations(updatedLocations); // Save updated locations to AsyncStorage
+        setModalVisible(false); // Close modal
+        // Trigger re-render of MapView by changing the key
+        setMapKey(prevKey => prevKey + 1);
     };
 
     const toggleFavorite = () => {
-        setFavorite(!favorite);
+        // Toggle favorite status of location
+        const updatedFavorite = !selectedLocation.favorite; // Toggle favorite status
+        setFavorite(updatedFavorite); // Update local state
+        updateLocationFavorite(selectedLocation.id, updatedFavorite); // Update location in main state
+    };
+
+    const updateLocationFavorite = (locationId, favoriteStatus) => {
+        // Update favorite status in main locations state
+        const updatedLocations = locations.map(loc => {
+            if (loc.id === locationId) {
+                return {
+                    ...loc,
+                    favorite: favoriteStatus,
+                };
+            }
+            return loc;
+        });
+
+        setLocations(updatedLocations); // Update locations state
+        saveLocations(updatedLocations); // Save updated locations to AsyncStorage
+        // Trigger re-render of MapView by changing the key
+        setMapKey(prevKey => prevKey + 1);
     };
 
     const toggleDrawer = () => {
+        // Toggle visibility of drawer
         setDrawerVisible(!drawerVisible);
     };
 
     return (
         <View style={styles.container}>
+            {/* Map view with markers and circles */}
             <MapView
+                key={mapKey} // Key to trigger re-render
                 style={styles.map}
                 region={mapRegion}
                 customMapStyle={isDarkMode ? darkMapStyle : []} // Apply dark map style conditionally
             >
                 {locations.map((location) => (
+                    // Marker for each location on the map
                     <Marker
                         key={location.id}
                         coordinate={{ latitude: location.latitude, longitude: location.longitude }}
                         title={location.name}
                         pinColor={location.favorite ? 'yellow' : 'red'} // Change pinColor based on favorite status
                     >
+                        {/* Callout with location details */}
                         <Callout onPress={() => openModal(location)}>
                             <View style={styles.callout}>
                                 <Text style={styles.calloutTitle}>{location.name}</Text>
@@ -115,6 +150,7 @@ function Map({ locations, setLocations, saveLocations, isDarkMode }) {
                         </Callout>
                     </Marker>
                 ))}
+                {/* Circle indicating current location */}
                 {currentLocation && (
                     <Circle
                         center={currentLocation}
@@ -126,6 +162,7 @@ function Map({ locations, setLocations, saveLocations, isDarkMode }) {
                 )}
             </MapView>
 
+            {/* Button to toggle drawer visibility */}
             <TouchableOpacity style={styles.drawerButton} onPress={toggleDrawer}>
                 <MaterialCommunityIcons
                     name={drawerVisible ? 'close-circle' : 'view-headline'}
@@ -134,8 +171,10 @@ function Map({ locations, setLocations, saveLocations, isDarkMode }) {
                 />
             </TouchableOpacity>
 
+            {/* Drawer component for selecting locations */}
             <Drawer visible={drawerVisible} locations={locations} selectLocation={selectLocationFromDrawer} isDarkMode={isDarkMode} />
 
+            {/* Modal for editing location details */}
             <Modal
                 visible={modalVisible}
                 animationType="slide"
@@ -293,9 +332,6 @@ const styles = StyleSheet.create({
         top: 20,
         left: 20,
         zIndex: 1,
-    },
-    drawerButtonText: {
-        fontSize: 16,
     },
 });
 
