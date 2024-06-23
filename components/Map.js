@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Modal, TextInput, Button, Text, TouchableOpacity } from 'react-native';
-import MapView, { Marker, Callout } from 'react-native-maps';
+import MapView, { Marker, Callout, Circle } from 'react-native-maps';
 import Drawer from './Drawer';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import darkMapStyle from './darkMapStyle.json'; // Import the dark map style
+import * as Location from 'expo-location'; // Import Location from Expo
 
 function Map({ locations, setLocations, saveLocations, isDarkMode }) {
     const [selectedLocation, setSelectedLocation] = useState(null);
@@ -12,12 +13,41 @@ function Map({ locations, setLocations, saveLocations, isDarkMode }) {
     const [favorite, setFavorite] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [drawerVisible, setDrawerVisible] = useState(false);
+    const [currentLocation, setCurrentLocation] = useState(null);
     const [mapRegion, setMapRegion] = useState({
         latitude: 51.92561635593618,
         longitude: 4.509532641744117,
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421,
     });
+
+    useEffect(() => {
+        requestLocationPermission();
+    }, []);
+
+    const requestLocationPermission = async () => {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+            alert('Permission to access location was denied');
+        } else {
+            getCurrentLocation();
+        }
+    };
+
+    const getCurrentLocation = async () => {
+        try {
+            const location = await Location.getCurrentPositionAsync({});
+            const { latitude, longitude } = location.coords;
+            setCurrentLocation({ latitude, longitude });
+            setMapRegion({
+                ...mapRegion,
+                latitude,
+                longitude,
+            });
+        } catch (error) {
+            alert('Error fetching location: ' + error.message);
+        }
+    };
 
     const selectLocationFromDrawer = (location) => {
         setSelectedLocation(location);
@@ -85,6 +115,15 @@ function Map({ locations, setLocations, saveLocations, isDarkMode }) {
                         </Callout>
                     </Marker>
                 ))}
+                {currentLocation && (
+                    <Circle
+                        center={currentLocation}
+                        radius={100} // Example radius in meters
+                        strokeWidth={1}
+                        strokeColor="rgba(81,175,247, 1)"
+                        fillColor="rgba(81,175,247, 0.6)"
+                    />
+                )}
             </MapView>
 
             <TouchableOpacity style={styles.drawerButton} onPress={toggleDrawer}>
